@@ -24,6 +24,7 @@ router = APIRouter(
 # GET TOTAL VISITOR COUNT
 # =====================================
 
+@router.get("")
 @router.get("/")
 async def get_visitors(
     db: Session = Depends(get_db)

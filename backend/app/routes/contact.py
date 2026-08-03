@@ -18,6 +18,7 @@ router = APIRouter(
 )
 
 
+@router.post("")
 @router.post("/")
 async def submit_contact_form(
     data: ContactRequest,
