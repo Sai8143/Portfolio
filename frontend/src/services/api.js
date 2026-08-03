@@ -20,7 +20,7 @@ export async function sendMessage(data) {
     }).catch((err) => console.log("Email dispatch warning:", err));
 
     // 2. Save into database backend
-    const response = await fetch(`${API_URL}/contact`, {
+    const response = await fetch(`${API_URL}/api/contact`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import BlackHoleScene from "./BlackHoleScene";
 import LoadingMessages from "./LoadingMessages";
 
-// Web Audio API High-Volume Cinematic Orbital Sound Synthesizer
+// Web Audio API High-Fidelity Interstellar Sci-Fi Black Hole Synthesizer
 function playSciFiLoaderSound(progress, audioCtxRef, oscRef, gainRef, pannerRef, filterRef) {
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -22,41 +22,50 @@ function playSciFiLoaderSound(progress, audioCtxRef, oscRef, gainRef, pannerRef,
     }
 
     if (!oscRef.current && ctx.state === "running") {
-      // 1. Triple Harmonic Oscillators (Loud, Rich, Cinematic)
-      const osc1 = ctx.createOscillator(); // Fundamental Sine
-      const osc2 = ctx.createOscillator(); // Octave Shimmer Triangle
-      const osc3 = ctx.createOscillator(); // Sub Sawtooth Drone
-      const gain = ctx.createGain();
+      // 1. Deep Sub-Bass Singularity Drone (Pure Sine, no harsh buzz)
+      const subOsc = ctx.createOscillator();
+      subOsc.type = "sine";
+      subOsc.frequency.setValueAtTime(55, ctx.currentTime); // Low A
 
-      osc1.type = "sine";
-      osc1.frequency.setValueAtTime(130, ctx.currentTime);
+      // 2. Sci-Fi Harmonic Crystal Resonator (Glassy Metallic Shimmer)
+      const harmonicOsc1 = ctx.createOscillator();
+      harmonicOsc1.type = "sine";
+      harmonicOsc1.frequency.setValueAtTime(110, ctx.currentTime);
 
-      osc2.type = "triangle";
-      osc2.frequency.setValueAtTime(260, ctx.currentTime);
+      const harmonicOsc2 = ctx.createOscillator();
+      harmonicOsc2.type = "sine";
+      harmonicOsc2.frequency.setValueAtTime(220, ctx.currentTime);
 
-      osc3.type = "sawtooth";
-      osc3.frequency.setValueAtTime(65, ctx.currentTime);
+      // 3. Orbital LFO Pitch Modulator (Creates cosmic rotation sweep)
+      const lfo = ctx.createOscillator();
+      const lfoGain = ctx.createGain();
+      lfo.frequency.setValueAtTime(0.4, ctx.currentTime); // 0.4 Hz slow rotation
+      lfoGain.gain.setValueAtTime(8, ctx.currentTime); // Pitch fluctuation depth
+      lfo.connect(harmonicOsc1.frequency);
+      lfo.connect(harmonicOsc2.frequency);
+      lfo.start();
 
-      // 2. Warm Lowpass Filter (Resonant & Crisp)
+      // 4. High-Resonance Bandpass Filter (Sweeping Sci-Fi Doppler Effect)
       const filter = ctx.createBiquadFilter();
-      filter.type = "lowpass";
-      filter.frequency.setValueAtTime(500, ctx.currentTime);
-      filter.Q.setValueAtTime(2.0, ctx.currentTime);
+      filter.type = "bandpass";
+      filter.frequency.setValueAtTime(320, ctx.currentTime);
+      filter.Q.setValueAtTime(3.5, ctx.currentTime); // Sharp, glassy resonance
 
-      // 3. Stereo Orbital Panner
+      // 5. 3D Stereo Orbital Panner
       let panner = null;
       if (ctx.createStereoPanner) {
         panner = ctx.createStereoPanner();
-        panner.pan.setValueAtTime(-0.5, ctx.currentTime);
+        panner.pan.setValueAtTime(-0.6, ctx.currentTime);
       }
 
-      // Instant Rich Volume Level (0.3 peak gain starting immediately at 0%)
+      // Master Gain Control (Instant smooth ramp)
+      const gain = ctx.createGain();
       gain.gain.setValueAtTime(0.01, ctx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.2);
+      gain.gain.linearRampToValueAtTime(0.32, ctx.currentTime + 0.3);
 
-      osc1.connect(filter);
-      osc2.connect(filter);
-      osc3.connect(filter);
+      subOsc.connect(gain);
+      harmonicOsc1.connect(filter);
+      harmonicOsc2.connect(filter);
 
       if (panner) {
         filter.connect(panner);
@@ -66,11 +75,11 @@ function playSciFiLoaderSound(progress, audioCtxRef, oscRef, gainRef, pannerRef,
       }
       gain.connect(ctx.destination);
 
-      osc1.start();
-      osc2.start();
-      osc3.start();
+      subOsc.start();
+      harmonicOsc1.start();
+      harmonicOsc2.start();
 
-      oscRef.current = { osc1, osc2, osc3 };
+      oscRef.current = { subOsc, harmonicOsc1, harmonicOsc2, lfo };
       gainRef.current = gain;
       pannerRef.current = panner;
       filterRef.current = filter;
@@ -78,58 +87,74 @@ function playSciFiLoaderSound(progress, audioCtxRef, oscRef, gainRef, pannerRef,
 
     if (oscRef.current && gainRef.current && ctx.state === "running") {
       const time = ctx.currentTime;
-      // Frequency swells smoothly with orbital speed (130Hz -> 280Hz)
-      const freq1 = 130 + (progress / 100) * 150;
-      const freq2 = 260 + (progress / 100) * 300;
-      const freq3 = 65 + (progress / 100) * 75;
+      const progressRatio = progress / 100;
 
-      oscRef.current.osc1.frequency.setTargetAtTime(freq1, time, 0.1);
-      oscRef.current.osc2.frequency.setTargetAtTime(freq2, time, 0.1);
-      oscRef.current.osc3.frequency.setTargetAtTime(freq3, time, 0.1);
+      // Frequency elevates dynamically as black hole rotation speeds up
+      const subFreq = 55 + progressRatio * 45; // 55Hz -> 100Hz
+      const h1Freq = 110 + progressRatio * 180; // 110Hz -> 290Hz
+      const h2Freq = 220 + progressRatio * 360; // 220Hz -> 580Hz
 
-      // Filter opens up as black hole accumulates energy (500Hz -> 1600Hz)
+      oscRef.current.subOsc.frequency.setTargetAtTime(subFreq, time, 0.1);
+      oscRef.current.harmonicOsc1.frequency.setTargetAtTime(h1Freq, time, 0.1);
+      oscRef.current.harmonicOsc2.frequency.setTargetAtTime(h2Freq, time, 0.1);
+
+      // Resonant filter sweeps upwards creating futuristic energy accumulation
       if (filterRef.current) {
-        const filterFreq = 500 + (progress / 100) * 1100;
+        const filterFreq = 320 + progressRatio * 1600; // 320Hz -> 1920Hz
         filterRef.current.frequency.setTargetAtTime(filterFreq, time, 0.1);
       }
 
-      // Orbital Stereo Panning & Breathing Tremolo
-      const panSpeed = 1.0 + (progress / 100) * 2.5;
+      // Continuous Figure-8 Stereo Orbital Panning
       if (pannerRef.current) {
-        const panVal = Math.sin(time * panSpeed) * 0.8;
+        const panVal = Math.sin(time * (1.2 + progressRatio * 2.0)) * 0.85;
         pannerRef.current.pan.setTargetAtTime(panVal, time, 0.05);
       }
 
-      // Rhythmic orbital pulse volume (0.28 base gain + 0.06 pulse swell)
-      const pulseVolume = 0.28 + Math.sin(time * panSpeed * 2) * 0.06;
+      // Smooth Orbital Pulse Gain
+      const pulseVolume = 0.30 + Math.sin(time * 3.0) * 0.04;
       gainRef.current.gain.setTargetAtTime(pulseVolume, time, 0.05);
 
-      // 100% Cinematic Impact Boom (Powerful resolution drop)
+      // 100% Interstellar Warp Resolution (Sub-Boom + High Shimmer Discharge)
       if (progress >= 98 && !audioCtxRef.current.chimePlayed) {
         audioCtxRef.current.chimePlayed = true;
 
+        // Sub Impact Boom
         const subBoom = ctx.createOscillator();
         const boomGain = ctx.createGain();
-
         subBoom.type = "sine";
-        subBoom.frequency.setValueAtTime(220, time);
-        subBoom.frequency.exponentialRampToValueAtTime(50, time + 0.9);
+        subBoom.frequency.setValueAtTime(180, time);
+        subBoom.frequency.exponentialRampToValueAtTime(35, time + 1.2);
 
-        boomGain.gain.setValueAtTime(0.45, time);
-        boomGain.gain.exponentialRampToValueAtTime(0.001, time + 1.0);
+        boomGain.gain.setValueAtTime(0.50, time);
+        boomGain.gain.exponentialRampToValueAtTime(0.001, time + 1.2);
 
         subBoom.connect(boomGain);
         boomGain.connect(ctx.destination);
-
         subBoom.start();
-        subBoom.stop(time + 1.1);
+        subBoom.stop(time + 1.3);
 
-        // Fade out main orbital drone
-        gainRef.current.gain.linearRampToValueAtTime(0.001, time + 0.8);
+        // High Shimmer Sweep
+        const shimmer = ctx.createOscillator();
+        const shimmerGain = ctx.createGain();
+        shimmer.type = "sine";
+        shimmer.frequency.setValueAtTime(1200, time);
+        shimmer.frequency.exponentialRampToValueAtTime(2400, time + 0.4);
+        shimmer.frequency.exponentialRampToValueAtTime(100, time + 1.0);
+
+        shimmerGain.gain.setValueAtTime(0.20, time);
+        shimmerGain.gain.exponentialRampToValueAtTime(0.001, time + 1.0);
+
+        shimmer.connect(shimmerGain);
+        shimmerGain.connect(ctx.destination);
+        shimmer.start();
+        shimmer.stop(time + 1.1);
+
+        // Fade main synth
+        gainRef.current.gain.linearRampToValueAtTime(0.001, time + 0.9);
       }
     }
   } catch {
-    // Ignore audio policy restrictions
+    // Audio context restriction safety
   }
 }
 

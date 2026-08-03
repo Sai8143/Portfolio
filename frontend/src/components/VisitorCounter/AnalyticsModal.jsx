@@ -14,7 +14,7 @@ export default function AnalyticsModal({ isOpen, onClose, visitorCount = 42 }) {
     let isMounted = true;
     setLoading(true);
 
-    fetch(`${API_URL}/visitor/analytics`)
+    fetch(`${API_URL}/api/visitor/analytics`)
       .then((res) => {
         if (!res.ok) throw new Error("Backend offline");
         return res.json();

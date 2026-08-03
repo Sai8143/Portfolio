@@ -2,7 +2,7 @@
 from fastapi import APIRouter
 
 router = APIRouter(
-    prefix="/profile",
+    prefix="/api/profile",
     tags=["Profile"]
 )
 
@@ -16,21 +16,21 @@ async def get_profile():
         "Sai Ganesh Chinni",
 
         "role":
-        "AI Engineer | Full Stack Developer | Cybersecurity Enthusiast",
+        "AI Engineer | Full Stack Developer",
 
         "description":
         """
 Designing intelligent digital systems,
 future-focused interfaces,
 AI-powered applications,
-and secure technology experiences.
+and modern software experiences.
 
 Passionate about Artificial Intelligence,
-Cybersecurity and modern software engineering.
+Cloud Systems and modern software engineering.
         """.strip(),
 
         "location":
-        "Andhra Pradesh, India",
+        "Hyderabad, Telangana, India",
 
         "resume":
         "/resume.pdf",
@@ -48,7 +48,7 @@ Cybersecurity and modern software engineering.
 
             "Artificial Intelligence",
 
-            "Cybersecurity",
+            "FastAPI",
 
             "Firebase",
 

@@ -286,7 +286,7 @@ function VisitorCounter({ onOpenAnalytics }) {
           localStorage.setItem("portfolio_device_id", deviceId);
         }
 
-        await fetch(`${API_URL}/visitor/register`, {
+        await fetch(`${API_URL}/api/visitor/register`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -296,7 +296,7 @@ function VisitorCounter({ onOpenAnalytics }) {
           }),
         }).catch(() => {});
 
-        const response = await fetch(`${API_URL}/visitor`);
+        const response = await fetch(`${API_URL}/api/visitor`);
         if (response.ok) {
           const data = await response.json();
           setCount(data.count || 42);

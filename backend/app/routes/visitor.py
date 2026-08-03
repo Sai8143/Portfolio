@@ -15,7 +15,7 @@ from app.services.visitor_service import (
 )
 
 router = APIRouter(
-    prefix="/visitor",
+    prefix="/api/visitor",
     tags=["Visitor"]
 )
 

@@ -13,7 +13,7 @@ from app.schemas.schema import (
 )
 
 router = APIRouter(
-    prefix="/contact",
+    prefix="/api/contact",
     tags=["Contact"]
 )
 

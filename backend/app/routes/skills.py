@@ -2,7 +2,7 @@
 from fastapi import APIRouter
 
 router = APIRouter(
-    prefix="/skills",
+    prefix="/api/skills",
     tags=["Skills"]
 )
 
@@ -78,15 +78,15 @@ async def get_skills():
 
             {
                 "title":
-                "Cybersecurity",
+                "DevOps & Cloud",
 
                 "skills": [
 
-                    "Network Security",
+                    "Docker",
 
-                    "Digital Security",
+                    "Git & GitHub",
 
-                    "Cybersecurity Fundamentals"
+                    "Cloud Infrastructure"
                 ]
             }
         ],
@@ -101,6 +101,6 @@ async def get_skills():
 
             "Artificial Intelligence",
 
-            "Cybersecurity"
+            "FastAPI"
         ]
     }

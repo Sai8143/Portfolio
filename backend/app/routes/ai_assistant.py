@@ -7,7 +7,7 @@ from app.schemas.schema import (
 )
 
 router = APIRouter(
-    prefix="/ai",
+    prefix="/api/ai",
     tags=["AI Assistant"]
 )
 

@@ -1,21 +1,14 @@
 
-from pydantic import (
-    BaseModel,
-    EmailStr
-)
+from pydantic import BaseModel
 
 
 # =====================================
 # CONTACT
 # =====================================
 
-class ContactRequest(
-    BaseModel
-):
+class ContactRequest(BaseModel):
     name: str
-
-    email: EmailStr
-
+    email: str
     message: str
 
 
