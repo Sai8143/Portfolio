@@ -1,0 +1,243 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ======================================
+   ROOT
+====================================== */
+
+:root{
+  --bg:#020202;
+  --card:#0b0b0b;
+  --border:rgba(255,255,255,.08);
+  --text:#ffffff;
+  --muted:#9ca3af;
+}
+
+/* ======================================
+   BASE
+====================================== */
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  background:#020202;
+  color:white;
+  font-family:Inter,sans-serif;
+  overflow-x:hidden;
+}
+
+/* ======================================
+   SCROLLBAR
+====================================== */
+
+::-webkit-scrollbar{
+  width:8px;
+}
+
+::-webkit-scrollbar-track{
+  background:#050505;
+}
+
+::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.15);
+  border-radius:999px;
+}
+
+::-webkit-scrollbar-thumb:hover{
+  background:rgba(255,255,255,.25);
+}
+
+/* ======================================
+   SECTION
+====================================== */
+
+.section{
+  position:relative;
+  padding-top:140px;
+  padding-bottom:140px;
+}
+
+/* ======================================
+   CONTAINER
+====================================== */
+
+.flow-code {
+  display: inline-block;
+  font-weight: 900;
+  background: linear-gradient(
+    90deg,
+    #a1a2a2,
+    #ffffff,
+    #00f5ff
+  );
+
+  background-size: 300% auto;
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  animation: flow 2.5s linear infinite;
+
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+}
+
+.container-custom{
+  width:100%;
+  max-width:1400px;
+  margin:auto;
+  padding-left:24px;
+  padding-right:24px;
+}
+
+/* ======================================
+   GLASS CARD
+====================================== */
+
+.glass{
+  background:rgba(255,255,255,.03);
+
+  backdrop-filter:blur(20px);
+
+  border:1px solid rgba(255,255,255,.08);
+
+  border-radius:32px;
+}
+
+/* ======================================
+   TERMINAL LABEL
+====================================== */
+
+.terminal-label{
+  font-size:12px;
+  letter-spacing:6px;
+  text-transform:uppercase;
+  color:#94a3b8;
+  font-family:"JetBrains Mono", monospace;
+}
+
+/* ======================================
+   TITLE
+====================================== */
+
+.section-title{
+  font-size:clamp(2rem,5vw,4rem);
+  font-weight:800;
+  line-height:1.1;
+  color:white;
+}
+
+.section-subtitle{
+  margin-top:16px;
+  color:#94a3b8;
+  max-width:700px;
+  line-height:1.8;
+}
+
+/* ======================================
+   GLOW ORBS
+====================================== */
+
+.glow-orb{
+  position:absolute;
+  border-radius:999px;
+  pointer-events:none;
+  filter:blur(120px);
+}
+
+.glow-orb-white{
+  background:rgba(255,255,255,.06);
+}
+
+.glow-orb-gray{
+  background:rgba(255,255,255,.03);
+}
+
+/* ======================================
+   BUTTONS
+====================================== */
+
+.btn-primary{
+  height:60px;
+
+  padding:0 32px;
+
+  border-radius:18px;
+
+  background:white;
+
+  color:black;
+
+  font-weight:700;
+
+  transition:.3s;
+}
+
+.btn-primary:hover{
+  transform:translateY(-3px);
+}
+
+.btn-secondary{
+  height:60px;
+
+  padding:0 32px;
+
+  border-radius:18px;
+
+  border:1px solid rgba(255,255,255,.08);
+
+  background:rgba(255,255,255,.03);
+
+  color:white;
+
+  transition:.3s;
+}
+
+.btn-secondary:hover{
+  background:rgba(255,255,255,.06);
+}
+
+/* ======================================
+   ANIMATIONS
+====================================== */
+
+@keyframes float{
+  0%{
+    transform:translateY(0);
+  }
+  50%{
+    transform:translateY(-15px);
+  }
+  100%{
+    transform:translateY(0);
+  }
+}
+
+.float{
+  animation:float 5s ease-in-out infinite;
+}
+
+@keyframes pulseGlow{
+  0%{
+    opacity:.4;
+  }
+  50%{
+    opacity:1;
+  }
+  100%{
+    opacity:.4;
+  }
+}
+
+.pulse-glow{
+  animation:pulseGlow 3s infinite;
+}
