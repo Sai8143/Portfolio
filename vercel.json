@@ -1,0 +1,36 @@
+{
+  "builds": [
+    {
+      "src": "backend/api/index.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/visitor/(.*)",
+      "destination": "backend/api/index.py"
+    },
+    {
+      "src": "/contact/(.*)",
+      "destination": "backend/api/index.py"
+    },
+    {
+      "src": "/ai/(.*)",
+      "destination": "backend/api/index.py"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "destination": "frontend/index.html"
+    }
+  ]
+}
