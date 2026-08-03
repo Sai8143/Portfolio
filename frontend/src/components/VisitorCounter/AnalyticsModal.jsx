@@ -1,12 +1,26 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Activity, Server, Cpu, Globe, ShieldCheck, RefreshCw } from "lucide-react";
+import { X, Activity, Server, Cpu, Globe, ShieldCheck, RefreshCw, Users, Lock, Key, CheckCircle2, Unlock } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://backend-ruby-nine-62.vercel.app";
 
+// Allowed Admin Passwords (case-insensitive)
+const ADMIN_PASSWORDS = ["sai8143", "sai", "admin123", "saiganesh"];
+
 export default function AnalyticsModal({ isOpen, onClose, visitorCount = 42 }) {
   const [telemetry, setTelemetry] = useState(null);
+  const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [authError, setAuthError] = useState(false);
+
+  useEffect(() => {
+    // Check if previously authorized in session
+    if (sessionStorage.getItem("visitor_logs_authorized") === "true") {
+      setIsAuthorized(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -14,41 +28,37 @@ export default function AnalyticsModal({ isOpen, onClose, visitorCount = 42 }) {
     let isMounted = true;
     setLoading(true);
 
-    fetch(`${API_URL}/api/visitor/analytics`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Backend offline");
-        return res.json();
-      })
-      .then((data) => {
-        if (isMounted) {
-          setTelemetry(data);
-          setLoading(false);
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          // Fallback gracefully to real visitorCount prop
-          setTelemetry({
-            total_page_views: visitorCount,
-            total_unique_devices: Math.max(1, Math.floor(visitorCount * 0.8)),
-            active_nodes: "Online / Production Engine",
-            avg_response_time: "< 12 ms",
-            security_encryption: "AES-256 Enabled",
-            browser_breakdown: [
-              { name: "Chrome / Chromium", percent: 75 },
-              { name: "Safari / WebKit", percent: 15 },
-              { name: "Firefox / Gecko", percent: 10 },
-            ],
-            status: "online",
-          });
-          setLoading(false);
-        }
-      });
+    Promise.all([
+      fetch(`${API_URL}/api/visitor/analytics`).then((res) => (res.ok ? res.json() : null)).catch(() => null),
+      fetch(`${API_URL}/api/visitor/logs?limit=15`).then((res) => (res.ok ? res.json() : null)).catch(() => null),
+    ]).then(([telemetryData, logsData]) => {
+      if (isMounted) {
+        if (telemetryData) setTelemetry(telemetryData);
+        if (logsData && logsData.logs) setLogs(logsData.logs);
+        setLoading(false);
+      }
+    });
 
     return () => {
       isMounted = false;
     };
   }, [isOpen, visitorCount]);
+
+  const handleUnlock = (e) => {
+    e.preventDefault();
+    if (ADMIN_PASSWORDS.includes(passwordInput.toLowerCase().trim())) {
+      setIsAuthorized(true);
+      setAuthError(false);
+      sessionStorage.setItem("visitor_logs_authorized", "true");
+    } else {
+      setAuthError(true);
+    }
+  };
+
+  const handleLock = () => {
+    setIsAuthorized(false);
+    sessionStorage.removeItem("visitor_logs_authorized");
+  };
 
   if (!isOpen) return null;
 
@@ -76,7 +86,7 @@ export default function AnalyticsModal({ isOpen, onClose, visitorCount = 42 }) {
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-2xl bg-zinc-900/95 border border-white/10 rounded-3xl p-6 lg:p-8 shadow-2xl backdrop-blur-2xl text-white font-sans overflow-hidden"
+          className="relative w-full max-w-3xl max-h-[85vh] overflow-y-auto bg-zinc-900/95 border border-white/10 rounded-3xl p-6 lg:p-8 shadow-2xl backdrop-blur-2xl text-white font-sans custom-scrollbar"
         >
           <button
             onClick={onClose}
@@ -92,11 +102,11 @@ export default function AnalyticsModal({ isOpen, onClose, visitorCount = 42 }) {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold">System Telemetry & Visitor Analytics</h2>
+                <h2 className="text-xl font-bold">System Telemetry & Visitor Database</h2>
                 <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
               </div>
               <p className="text-xs font-mono text-zinc-400">
-                Live FastAPI SQLite Backend Analytics Node
+                FastAPI + SQLAlchemy Admin Protected Tracking Node
               </p>
             </div>
           </div>
@@ -104,12 +114,12 @@ export default function AnalyticsModal({ isOpen, onClose, visitorCount = 42 }) {
           {loading ? (
             <div className="py-12 flex flex-col items-center justify-center gap-3 text-zinc-400 font-mono text-xs">
               <RefreshCw className="w-6 h-6 animate-spin text-white" />
-              <span>Fetching Real Database Telemetry...</span>
+              <span>Querying Database Logs...</span>
             </div>
           ) : (
-            <>
+            <div className="space-y-6">
               {/* METRIC CARDS */}
-              <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-2 gap-4">
                 {metricCards.map((item, idx) => {
                   const IconComp = item.icon;
                   return (
@@ -129,10 +139,107 @@ export default function AnalyticsModal({ isOpen, onClose, visitorCount = 42 }) {
                 })}
               </div>
 
+              {/* PASSWORD PROTECTED VISITOR DATABASE LOGS TABLE */}
+              <div className="p-5 rounded-2xl bg-zinc-800/40 border border-white/10 space-y-4 backdrop-blur-md">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-white" />
+                    <h3 className="terminal-label">VISITOR DATABASE LOGS (WHO SAW YOUR SITE)</h3>
+                  </div>
+                  {isAuthorized ? (
+                    <button
+                      onClick={handleLock}
+                      className="flex items-center gap-1 text-[10px] font-mono px-2.5 py-1 rounded-full bg-white/10 text-zinc-300 hover:text-white border border-white/10 transition-all"
+                    >
+                      <Unlock className="w-3 h-3 text-white" />
+                      <span>ADMIN UNLOCKED</span>
+                    </button>
+                  ) : (
+                    <span className="flex items-center gap-1 text-[10px] font-mono px-2.5 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
+                      <Lock className="w-3 h-3" />
+                      PROTECTED
+                    </span>
+                  )}
+                </div>
+
+                {isAuthorized ? (
+                  /* UNLOCKED: SHOW REAL VISITOR LOGS TABLE */
+                  logs.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs font-mono">
+                        <thead>
+                          <tr className="border-b border-white/10 text-zinc-400">
+                            <th className="pb-2 font-normal">IP Address</th>
+                            <th className="pb-2 font-normal">Browser / Device</th>
+                            <th className="pb-2 font-normal">OS</th>
+                            <th className="pb-2 font-normal text-right">Visited At</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5 text-zinc-300">
+                          {logs.map((log) => (
+                            <tr key={log.id} className="hover:bg-white/[0.02] transition-colors">
+                              <td className="py-2.5 font-semibold text-white flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                                {log.ip_address}
+                              </td>
+                              <td className="py-2.5 truncate max-w-[180px]">{log.browser}</td>
+                              <td className="py-2.5">{log.operating_system}</td>
+                              <td className="py-2.5 text-right text-zinc-400">{log.visited_at}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="p-4 rounded-xl bg-black/40 text-center text-xs font-mono text-zinc-400">
+                      Database active. New visitors will be recorded automatically in real time!
+                    </div>
+                  )
+                ) : (
+                  /* LOCKED: PASSWORD GATE FORM */
+                  <form onSubmit={handleUnlock} className="p-5 rounded-2xl bg-black/60 border border-white/10 space-y-4 text-center">
+                    <div className="w-12 h-12 rounded-2xl bg-zinc-800/80 border border-white/10 flex items-center justify-center mx-auto text-white">
+                      <Lock className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white">Admin Authorization Required</h4>
+                      <p className="text-xs text-zinc-400 mt-1">
+                        Enter your Admin Password to reveal detailed visitor IPs, devices, and timestamps.
+                      </p>
+                    </div>
+
+                    <div className="flex gap-2 max-w-md mx-auto">
+                      <input
+                        type="password"
+                        value={passwordInput}
+                        onChange={(e) => {
+                          setPasswordInput(e.target.value);
+                          setAuthError(false);
+                        }}
+                        placeholder="Enter Admin Password"
+                        className="flex-1 h-[44px] rounded-xl bg-white/5 border border-white/10 px-4 text-xs font-mono outline-none focus:border-white/30 text-white placeholder:text-zinc-600"
+                      />
+                      <button
+                        type="submit"
+                        className="h-[44px] px-5 rounded-xl bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition-all flex items-center gap-1.5 shrink-0"
+                      >
+                        <Key className="w-3.5 h-3.5" /> Unlock Logs
+                      </button>
+                    </div>
+
+                    {authError && (
+                      <p className="text-xs font-mono text-red-400">
+                        ❌ Invalid Admin Password.
+                      </p>
+                    )}
+                  </form>
+                )}
+              </div>
+
               {/* BROWSER DISTRIBUTION */}
               <div className="p-5 rounded-2xl bg-zinc-800/40 border border-white/10 space-y-4 backdrop-blur-md">
                 <div className="flex items-center justify-between">
-                  <h3 className="terminal-label">REAL BROWSER ENVIRONMENT DISTRIBUTION</h3>
+                  <h3 className="terminal-label">BROWSER ENVIRONMENT DISTRIBUTION</h3>
                   <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest">
                     DATABASE SYNCED
                   </span>
@@ -156,7 +263,7 @@ export default function AnalyticsModal({ isOpen, onClose, visitorCount = 42 }) {
                   ))}
                 </div>
               </div>
-            </>
+            </div>
           )}
         </motion.div>
       </div>

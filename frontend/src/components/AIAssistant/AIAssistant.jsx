@@ -951,6 +951,7 @@ import {
   FaPaperPlane,
   FaMicrophone,
   FaVolumeUp,
+  FaVolumeMute,
   FaStop,
   FaSatelliteDish,
   FaDatabase,
@@ -1158,109 +1159,126 @@ setVoiceLevel(
       AI RESPONSE ENGINE
   ===================================== */
 
-  const getAIResponse = (
-    userText
-  ) => {
+  const getAIResponse = (userText) => {
+    const q = userText.toLowerCase().trim();
 
-    const text =
-      userText.toLowerCase();
+    // 1. GREETINGS
+    if (["hi", "hello", "hey", "greetings", "good morning", "good evening", "sup"].some((w) => q.includes(w))) {
+      return `Hello! 👋 I am SaiAI, your interactive AI Assistant for Sai Ganesh's portfolio.
 
-    if (
-      text.includes("project") ||
-      text.includes("projects")
-    ) {
-      return `
-Sai has developed several major projects:
-
-1. Fake News Detection System
-2. Accident-Detection-AcciSense
-3. Online Tambola Game
-4. AI Based E-Learning Video Recommendation System
-
-These projects demonstrate expertise in Artificial Intelligence, Full Stack Development and modern software engineering.
-      `;
+You can ask me about:
+• 📄 Research Publications & Papers
+• 🚀 Featured Projects (AcciSense, Fake News, Tambola, E-Learning)
+• 🏢 Internship at AVNL Ordnance Factory
+• 💻 Technical Skills & Stack
+• 📬 Contact Details & Resume`;
     }
 
-    if (
-      text.includes("skill") ||
-      text.includes("skills") ||
-      text.includes("technology")
-    ) {
-      return `
-Sai's core technical skills include:
+    // 2. WHO IS SAI / ABOUT
+    if (["who is sai", "about sai", "who are you", "tell me about", "bio", "background"].some((w) => q.includes(w))) {
+      return `👤 About Sai Ganesh Chinni:
 
-• React.js
-• JavaScript
-• Tailwind CSS
-• Flutter
-• Dart
-• Python
-• FastAPI
-• Artificial Intelligence
-• Machine Learning
-• Firebase
-• MySQL
-• Git & GitHub
-• Full Stack Development
-      `;
+Sai Ganesh is an AI Engineer & Full Stack Developer based in Hyderabad / Andhra Pradesh, India.
+
+• 🚀 Specialization: Machine Learning, Computer Vision, React, Flutter, and FastAPI backends.
+• 💡 Goal: Architecting intelligent, scalable digital experiences to solve complex problems.`;
     }
 
-    if (
-      text.includes("internship") ||
-      text.includes("experience")
-    ) {
-      return `
-Sai completed internship training at:
+    // 3. RESEARCH PUBLICATIONS & PAPERS (SINGLE PUBLICATION)
+    if (["paper", "publication", "publications", "research", "ijam", "journal", "published", "article", "cityadapt"].some((w) => q.includes(w))) {
+      return `📄 Single Published Research Paper:
 
-AVNL Ordnance Factory
-Hyderabad
-
-He gained practical industry exposure and technical experience.
-      `;
+• Title: CITYADAPTAI – AI-Driven Smart City Personalization System
+• Journal: International Journal of Applied Mathematics (IJAM), Vol. 38, No. 4, 2025
+• DOI: https://doi.org/10.12732/ijam.v38i12s.1693
+• Contribution & Role: Assisted in frontend development and AI model integration for an AI-driven smart city personalization system.
+• Key Tags: AI Personalization, Smart City, AI Model Integration, Frontend Engineering, IJAM`;
     }
 
-    if (
-      text.includes("contact") ||
-      text.includes("email")
-    ) {
-      return `
-You can connect with Sai through:
+    // 4. PROJECTS OVERVIEW
+    if (["project", "projects", "work", "built", "apps", "creations"].some((w) => q.includes(w))) {
+      return `🚀 Featured Engineering Projects:
 
-Email:
-saiganesh0565@gmail.com
-
-GitHub:
-github.com/Sai8143
-
-Use the Contact section for more details.
-      `;
+1. 🚨 Accident-Detection-AcciSense: AI-powered road safety system (Published Research Paper).
+2. 📰 Fake News Detection System: NLP classifier model for identifying misinformation.
+3. 🎲 Online Tambola Game: Real-time multiplayer Flutter app with automated ticket sync.
+4. 🎓 AI E-Learning Recommendation System: Smart YouTube & tutorial recommendation engine.`;
     }
 
-    if (
-      text.includes("resume")
-    ) {
-      return `
-You can download Sai's resume directly from the Hero section.
-      `;
+    // 5. ACCISENSE
+    if (q.includes("accisense") || q.includes("accident") || q.includes("road safety")) {
+      return `🚨 Accident-Detection-AcciSense:
+
+An AI road safety platform leveraging Computer Vision (YOLO) to analyze live video feeds, detect vehicular accidents instantly, extract GPS locations, and alert emergency dispatch teams in real time.`;
     }
 
-    return `
-I can help you explore:
+    // 6. FAKE NEWS
+    if (q.includes("fake news") || q.includes("news") || q.includes("nlp")) {
+      return `📰 Fake News Detection System:
 
-• Projects
-• Skills
-• Technologies
-• Internship Experience
-• Resume
-• Contact Information
-• Career Goals
+An AI system using Natural Language Processing (NLP) and Machine Learning classifiers to evaluate news article patterns and flag misleading information.`;
+    }
+
+    // 7. TAMBOLA
+    if (q.includes("tambola") || q.includes("game")) {
+      return `🎲 Online Tambola Game:
+
+A real-time multiplayer mobile game developed using Flutter, Dart, and Firebase Realtime DB, featuring automated ticket validation and live number calling sync.`;
+    }
+
+    // 8. E-LEARNING
+    if (q.includes("learning") || q.includes("youtube") || q.includes("recommendation")) {
+      return `🎓 AI Based E-Learning Video Recommendation System:
+
+An EdTech platform that analyzes student goals to curate YouTube educational videos, courses, and interactive assessments.`;
+    }
+
+    // 9. SKILLS & STACK
+    if (["skill", "skills", "technology", "technologies", "stack", "python", "react", "flutter", "fastapi"].some((w) => q.includes(w))) {
+      return `💻 Technical Skills & Stack:
+
+• Frontend: React.js, JavaScript, Tailwind CSS, Framer Motion, HTML5/CSS3
+• Mobile: Flutter, Dart, Firebase
+• Backend & API: Python, FastAPI, REST APIs, SQLAlchemy
+• Database: MySQL, SQLite, Firebase Realtime DB
+• AI & Data: Machine Learning, Computer Vision (YOLO), NLP
+• Tools: Git, GitHub, Vercel, Docker`;
+    }
+
+    // 10. INTERNSHIP & EXPERIENCE
+    if (["internship", "experience", "avnl", "ordnance", "training", "company"].some((w) => q.includes(w))) {
+      return `🏢 Industrial Internship Experience:
+
+• Company: AVNL Ordnance Factory (Armoured Vehicles Nigam Limited), Hyderabad
+• Exposure: Industrial software workflows, defense system exposure, and production engineering processes.`;
+    }
+
+    // 11. CONTACT & SOCIALS
+    if (["contact", "email", "phone", "reach", "hire", "message", "linkedin", "github"].some((w) => q.includes(w))) {
+      return `📬 Get in Touch with Sai Ganesh:
+
+• Email: saiganesh0565@gmail.com
+• Phone: +91 8341296052
+• GitHub: github.com/Sai8143
+• Contact Form: Send a message directly in the "Start A Conversation" section below!`;
+    }
+
+    // 12. RESUME
+    if (q.includes("resume") || q.includes("cv")) {
+      return `📄 Resume Download:
+
+You can view and download Sai's official resume by clicking the "Download Resume" button in the Hero section!`;
+    }
+
+    // 13. DEFAULT FALLBACK
+    return `🤖 I am SaiAI, your intelligent portfolio assistant!
 
 Try asking:
-• Tell me about your projects
-• What are your skills?
-• Describe your internship
-• How can I contact Sai?
-    `;
+• "Tell me about Sai's research publication"
+• "What projects has Sai built?"
+• "What are Sai's core skills and tech stack?"
+• "Describe Sai's internship at AVNL Ordnance Factory"
+• "How can I contact Sai Ganesh?"`;
   };
 
   /* =====================================
@@ -1381,33 +1399,51 @@ Try asking:
   };
 
   /* =====================================
-      START VOICE
+      START / STOP VOICE INPUT
   ===================================== */
 
-  const startVoice = () => {
-
-    SpeechRecognition.startListening(
-      {
+  const toggleVoiceInput = () => {
+    if (listening) {
+      SpeechRecognition.stopListening();
+    } else {
+      resetTranscript();
+      SpeechRecognition.startListening({
         continuous: false,
         language: "en-IN",
-      }
-    );
-
+      });
+    }
   };
 
   /* =====================================
-      STOP SPEAKER
+      TOGGLE / STOP SPEAKER
   ===================================== */
 
-const stopSpeaker = () => {
+  const toggleSpeaker = () => {
+    setSpeakerEnabled((prev) => {
+      const nextState = !prev;
+      if (!nextState && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        setIsSpeaking(false);
+        setVoiceLevel(1);
+      }
+      return nextState;
+    });
+  };
 
-  window.speechSynthesis.cancel();
+  const stopSpeaker = () => {
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    setVoiceLevel(1);
+    setIsSpeaking(false);
+    setIsTyping(false);
+    setStreamingText("");
+  };
 
-  setVoiceLevel(1);
-
-  setIsSpeaking(false);
-
-};
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    handleSend();
+  };
     return (
     <section
       id="ai-assistant"
@@ -1484,41 +1520,49 @@ const stopSpeaker = () => {
                 >
 
                   <button
-                    onClick={() =>
-                      setSpeakerEnabled(
-                        !speakerEnabled
-                      )
-                    }
-                    className="
-                    w-10
-                    h-10
-                    rounded-xl
+                    onClick={toggleSpeaker}
+                    title={speakerEnabled ? "Mute AI Audio" : "Enable AI Audio"}
+                    className={`
+                    w-11
+                    h-11
+                    rounded-2xl
                     border
-                    border-white/10
+                    transition-all
+                    duration-300
                     flex
                     items-center
                     justify-center
-                    "
+                    ${
+                      speakerEnabled
+                        ? "border-white/20 bg-white/10 text-white shadow-[0_0_12px_rgba(255,255,255,0.15)]"
+                        : "border-white/10 bg-white/[0.03] text-zinc-500 hover:text-zinc-300"
+                    }
+                    `}
                   >
-                    <FaVolumeUp />
+                    {speakerEnabled ? <FaVolumeUp className="w-4 h-4" /> : <FaVolumeMute className="w-4 h-4" />}
                   </button>
 
                   <button
-                    onClick={
-                      stopSpeaker
-                    }
+                    onClick={stopSpeaker}
+                    title="Stop AI Output & Voice"
                     className="
-                    w-10
-                    h-10
-                    rounded-xl
+                    w-11
+                    h-11
+                    rounded-2xl
                     border
                     border-white/10
+                    bg-white/[0.03]
+                    hover:bg-white/10
+                    text-zinc-300
+                    hover:text-white
                     flex
                     items-center
                     justify-center
+                    transition-all
+                    duration-300
                     "
                   >
-                    <FaStop />
+                    <FaStop className="w-4 h-4" />
                   </button>
 
                 </div>
@@ -1800,7 +1844,8 @@ const stopSpeaker = () => {
 
               {/* INPUT AREA */}
 
-              <div
+              <form
+                onSubmit={handleFormSubmit}
                 className="
                 mt-8
                 flex
@@ -1818,7 +1863,7 @@ const stopSpeaker = () => {
                   onKeyDown={
                     handleKeyDown
                   }
-                  placeholder="Ask AI Core..."
+                  placeholder="Ask AI Core... (Press Enter to send)"
                   className="
                   flex-1
                   h-[60px]
@@ -1829,22 +1874,27 @@ const stopSpeaker = () => {
                   px-5
                   outline-none
                   focus:border-white/20
+                  text-white
+                  placeholder:text-zinc-500
                   "
                 />
 
                 <button
-                  onClick={
-                    handleSend
-                  }
+                  type="submit"
+                  title="Send Message (Enter)"
                   className="
                   w-[60px]
                   h-[60px]
                   rounded-2xl
                   bg-white
                   text-black
+                  hover:bg-zinc-200
                   flex
                   items-center
                   justify-center
+                  transition-all
+                  duration-300
+                  shrink-0
                   "
                 >
                   <FaPaperPlane />
@@ -1853,9 +1903,9 @@ const stopSpeaker = () => {
                 {browserSupportsSpeechRecognition && (
 
                   <button
-                    onClick={
-                      startVoice
-                    }
+                    type="button"
+                    onClick={toggleVoiceInput}
+                    title={listening ? "Stop Voice Listening" : "Start Voice Input"}
                     className={`
                     w-[60px]
                     h-[60px]
@@ -1865,10 +1915,13 @@ const stopSpeaker = () => {
                     flex
                     items-center
                     justify-center
+                    transition-all
+                    duration-300
+                    shrink-0
                     ${
                       listening
-                        ? "bg-white text-black"
-                        : "bg-white/5"
+                        ? "bg-white text-black animate-pulse shadow-[0_0_15px_rgba(255,255,255,0.4)]"
+                        : "bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white"
                     }
                     `}
                   >
@@ -1877,7 +1930,7 @@ const stopSpeaker = () => {
 
                 )}
 
-              </div>
+              </form>
 
             </GlassCard>
 
