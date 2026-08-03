@@ -2,10 +2,19 @@ import { useEffect, useState } from "react";
 
 export default function MagicCursorTrail() {
   const [particles, setParticles] = useState([]);
+  const [isTouch, setIsTouch] = useState(false);
 
   useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      ("ontouchstart" in window || navigator.maxTouchPoints > 0 || window.matchMedia("(pointer: coarse)").matches)
+    ) {
+      setIsTouch(true);
+      return;
+    }
+
     const handleMouseMove = (e) => {
-      if (Math.random() > 0.4) return; // Control particle spawn density
+      if (Math.random() > 0.4) return;
 
       const newParticle = {
         id: Math.random() + Date.now(),
@@ -25,7 +34,7 @@ export default function MagicCursorTrail() {
   }, []);
 
   useEffect(() => {
-    if (particles.length === 0) return;
+    if (isTouch || particles.length === 0) return;
 
     const interval = setInterval(() => {
       setParticles((prev) =>
@@ -41,7 +50,9 @@ export default function MagicCursorTrail() {
     }, 16);
 
     return () => clearInterval(interval);
-  }, [particles]);
+  }, [particles, isTouch]);
+
+  if (isTouch) return null;
 
   return (
     <div className="fixed inset-0 pointer-events-none z-40 overflow-hidden">

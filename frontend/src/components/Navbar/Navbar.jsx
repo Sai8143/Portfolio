@@ -590,13 +590,19 @@ const scrollToSection = (
                   border
                   border-white/[0.08]
 
-                  bg-black/70
+                  bg-black/85
 
                   backdrop-blur-2xl
 
                   p-5
 
-                  space-y-3
+                  space-y-2.5
+
+                  max-h-[75vh]
+
+                  overflow-y-auto
+
+                  custom-scrollbar
                   "
                 >
 

@@ -133,7 +133,8 @@ AI SYSTEM ONLINE
 
 <h1
 className="
-text-[3.5rem]
+text-[2.5rem]
+sm:text-[3.5rem]
 md:text-[5rem]
 lg:text-[6rem]
 
@@ -141,7 +142,8 @@ leading-[0.95]
 
 font-black
 
-tracking-[-4px]
+tracking-[-2px]
+sm:tracking-[-4px]
 
 mb-8
 "

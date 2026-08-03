@@ -14,12 +14,12 @@ export default function ProjectModal({ project, onClose, onLaunchSimulator }) {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           transition={{ duration: 0.3 }}
-          className="relative w-full max-w-3xl max-h-[85vh] overflow-y-auto bg-zinc-900/90 border border-white/10 rounded-3xl p-6 lg:p-8 shadow-2xl backdrop-blur-2xl text-white font-sans"
+          className="relative w-full max-w-3xl max-h-[85vh] overflow-y-auto bg-zinc-900/95 border border-white/10 rounded-3xl p-4 sm:p-6 lg:p-8 shadow-2xl backdrop-blur-2xl text-white font-sans custom-scrollbar"
         >
           {/* CLOSE BUTTON */}
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 p-2.5 rounded-2xl border border-white/10 bg-zinc-800/40 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all"
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2.5 rounded-2xl border border-white/10 bg-zinc-800/60 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all z-20"
           >
             <X className="w-5 h-5" />
           </button>
