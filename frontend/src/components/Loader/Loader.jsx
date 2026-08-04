@@ -216,7 +216,7 @@ export default function Loader({ onComplete }) {
           {/* TITLE AREA */}
           <div className="absolute top-[8vh] left-0 right-0 z-20 flex flex-col items-center text-center px-4">
             {/* NAME LETTERS */}
-            <div className="flex justify-center text-white text-3xl sm:text-5xl md:text-7xl font-black tracking-[-0.05em]">
+            <div className="flex justify-center text-white text-5xl md:text-7xl font-black tracking-[-0.05em]">
               {nameLetters.map((char, index) => {
                 const tiltPhase = Math.max(0, Math.min(1, (progress - 40) / 20));
                 const spiralPhase = Math.max(0, Math.min(1, (progress - 60) / 30));
@@ -225,7 +225,7 @@ export default function Loader({ onComplete }) {
                 const angle = index * 0.45 - spiralPhase * Math.PI * 6;
                 const radius = 220 * Math.pow(1 - spiralPhase, 3);
                 const x = progress >= 60 ? Math.cos(angle) * radius : 0;
-                const y = progress >= 60 ? Math.sin(angle) * radius : factor * targetY;
+                const y = progress >= 60 ? targetY + Math.sin(angle) * radius : factor * targetY;
 
                 return (
                   <motion.span
@@ -236,9 +236,9 @@ export default function Loader({ onComplete }) {
                       y,
                       rotate: tiltPhase * -25 + spiralPhase * -540,
                       skewX: tiltPhase * 12,
-                      scale: 1 - absorbPhase * 0.98,
-                      opacity: 0.95 - absorbPhase * 0.95,
-                      filter: `blur(${absorbPhase * 8}px)`,
+                      scale: 1 - absorbPhase,
+                      opacity: 1 - absorbPhase,
+                      filter: `blur(${absorbPhase * 10}px)`,
                       scaleX: 1 + spiralPhase * 2.5,
                       scaleY: 1 - spiralPhase * 0.4,
                     }}
@@ -260,7 +260,7 @@ export default function Loader({ onComplete }) {
                 const angle = index * 0.35 - spiralPhase * Math.PI * 6;
                 const radius = 180 * Math.pow(1 - spiralPhase, 3);
                 const x = progress >= 60 ? Math.cos(angle) * radius : 0;
-                const y = progress >= 60 ? Math.sin(angle) * radius : factor * subtitleTargetY;
+                const y = progress >= 60 ? subtitleTargetY + Math.sin(angle) * radius : factor * subtitleTargetY;
 
                 return (
                   <motion.span
@@ -270,9 +270,9 @@ export default function Loader({ onComplete }) {
                       x,
                       y,
                       rotate: tiltPhase * -15 + spiralPhase * -360,
-                      scale: 1 - absorbPhase * 0.98,
-                      opacity: 0.6 - absorbPhase * 0.6,
-                      filter: `blur(${absorbPhase * 6}px)`,
+                      scale: 1 - absorbPhase,
+                      opacity: 0.7 - absorbPhase * 0.7,
+                      filter: `blur(${absorbPhase * 8}px)`,
                     }}
                     transition={{ duration: 0.2 }}
                   >
