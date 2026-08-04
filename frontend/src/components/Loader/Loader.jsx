@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import BlackHoleScene from "./BlackHoleScene";
 import LoadingMessages from "./LoadingMessages";
+import { preloadWhooshSound } from "../../utils/whooshSound";
 
 // Web Audio API High-Fidelity Interstellar Sci-Fi Black Hole Synthesizer
 function playSciFiLoaderSound(progress, audioCtxRef, oscRef, gainRef, pannerRef, filterRef) {
@@ -172,10 +173,23 @@ export default function Loader({ onComplete }) {
   const pannerRef = useRef(null);
   const filterRef = useRef(null);
 
+  // Low Background Music Engine Ref
+  const bgMusicRef = useRef(null);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    preloadWhooshSound();
+
     setWindowHeight(window.innerHeight);
+
+    // Initialize Low Background Music
+    if (!bgMusicRef.current) {
+      const bgAudio = new Audio("/Low Background music.mp3");
+      bgAudio.loop = true;
+      bgAudio.volume = 0.55;
+      bgMusicRef.current = bgAudio;
+    }
 
     // Eagerly pre-instantiate AudioContext so it exists for instant user touch unlock
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -191,6 +205,10 @@ export default function Loader({ onComplete }) {
 
     const unlockAudio = () => {
       try {
+        // Start background music on user touch / click unlock
+        if (bgMusicRef.current && bgMusicRef.current.paused) {
+          bgMusicRef.current.play().catch(() => {});
+        }
         if (!audioCtxRef.current && AudioContext) {
           audioCtxRef.current = new AudioContext();
         }
@@ -221,6 +239,10 @@ export default function Loader({ onComplete }) {
       window.removeEventListener("touchend", unlockAudio);
       window.removeEventListener("pointerdown", unlockAudio);
       window.removeEventListener("keydown", unlockAudio);
+
+      if (bgMusicRef.current) {
+        bgMusicRef.current.pause();
+      }
     };
   }, []);
 
@@ -236,10 +258,37 @@ export default function Loader({ onComplete }) {
       setProgress(pct);
       playSciFiLoaderSound(pct, audioCtxRef, oscRef, gainRef, pannerRef, filterRef);
 
+      // Attempt background music play if not yet started
+      if (bgMusicRef.current && bgMusicRef.current.paused && pct < 85) {
+        bgMusicRef.current.play().catch(() => {});
+      }
+
+      // 🎵 SMOOTH BACKGROUND MUSIC FADE OUT AS LOADER APPROACHES 100%
+      // Ramps volume smoothly down from 0.55 -> 0.00 over the final 30% of loading (progress 70% to 100%)
+      if (bgMusicRef.current) {
+        if (pct < 70) {
+          bgMusicRef.current.volume = 0.55;
+        } else {
+          const fadeRatio = (100 - pct) / 30; // 1.0 -> 0.0
+          const targetVol = Math.max(0, 0.55 * Math.pow(fadeRatio, 1.5));
+          bgMusicRef.current.volume = targetVol;
+        }
+      }
+
       if (elapsed < duration) {
         frame = requestAnimationFrame(animate);
       } else {
         setProgress(100);
+
+        // Complete smooth fade out of background music
+        if (bgMusicRef.current) {
+          bgMusicRef.current.volume = 0;
+          setTimeout(() => {
+            if (bgMusicRef.current) {
+              bgMusicRef.current.pause();
+            }
+          }, 800);
+        }
 
         setTimeout(() => {
           setIsDone(true);

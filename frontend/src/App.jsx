@@ -16,6 +16,8 @@ import ProjectSimulators from "./components/Projects/ProjectSimulators";
 import ResumeModal from "./components/Resume/ResumeModal";
 import AnalyticsModal from "./components/VisitorCounter/AnalyticsModal";
 
+import { initGlobalButtonClickSound } from "./utils/clickSound";
+
 function App() {
   const [loading, setLoading] = useState(true);
 
@@ -33,9 +35,11 @@ function App() {
   };
 
   /* =====================================
-      FORCE TOP ON APP LOAD
+      GLOBAL BUTTON CLICK SOUND & FORCE TOP
   ===================================== */
   useEffect(() => {
+    const cleanupClickSound = initGlobalButtonClickSound();
+
     window.scrollTo({
       top: 0,
       left: 0,
@@ -43,6 +47,10 @@ function App() {
     });
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
+
+    return () => {
+      if (cleanupClickSound) cleanupClickSound();
+    };
   }, []);
 
   /* =====================================

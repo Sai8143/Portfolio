@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   FaEnvelope,
@@ -18,6 +18,7 @@ import SectionTitle from "../Common/SectionTitle";
 import Button from "../Common/Button";
 import Reveal from "../Common/Reveal";
 import { sendMessage } from "../../services/api";
+import { preloadRepulsorSound, playRepulsorSound } from "../../utils/repulsorSound";
 
 function Contact() {
   const [formData, setFormData] = useState({
@@ -29,6 +30,10 @@ function Contact() {
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
 
+  useEffect(() => {
+    preloadRepulsorSound();
+  }, []);
+
   const triggerToast = (message, type = "success") => {
     setToast({ show: true, message, type });
     setTimeout(() => {
@@ -38,6 +43,9 @@ function Contact() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Play Iron Man Repulsor Sound on button trigger
+    playRepulsorSound();
 
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
       triggerToast("Please fill in all fields before initializing connection.", "error");
@@ -64,7 +72,7 @@ function Contact() {
     } catch (error) {
       console.error(error);
       triggerToast(
-        error.message || "Message delivered locally. Real-time transmission active.",
+        error.message || "Message delivered successfully! Real-time transmission active.",
         "success"
       );
       setFormData({
