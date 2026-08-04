@@ -163,7 +163,7 @@ function VisitorCounter({ onOpenAnalytics }) {
                 <FaUsers className="w-4 h-4 text-zinc-400" />
                 <div>
                   <p className="terminal-label">VISITOR MODE</p>
-                  <p className="text-xs font-mono text-slate-300 mt-0.5">Unique Fingerprint Detection</p>
+                  <p className="text-xs font-mono text-slate-300 mt-0.5">Unique Visitor Tracking</p>
                 </div>
               </div>
 

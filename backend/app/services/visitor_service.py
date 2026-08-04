@@ -158,7 +158,7 @@ def get_analytics(db: Session) -> dict:
             "total_unique_devices": total_visitors,
             "active_nodes": "Online / Live Production Engine",
             "avg_response_time": "< 12 ms",
-            "security_encryption": "AES-256 Enabled",
+            "security_encryption": "HTTPS Encrypted",
             "browser_breakdown": browser_breakdown,
             "status": "online"
         }
@@ -169,7 +169,7 @@ def get_analytics(db: Session) -> dict:
             "total_unique_devices": 1,
             "active_nodes": "Online / Live Production Engine",
             "avg_response_time": "< 12 ms",
-            "security_encryption": "AES-256 Enabled",
+            "security_encryption": "HTTPS Encrypted",
             "browser_breakdown": [
                 {"name": "Chrome / Chromium", "percent": 75},
                 {"name": "Safari / WebKit", "percent": 25}

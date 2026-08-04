@@ -66,7 +66,7 @@ function Skills() {
             <p className="terminal-label mb-4">SKILLS MATRIX</p>
             <h2 className="section-title">Technology Arsenal</h2>
             <p className="section-subtitle">
-              Modern technologies powering intelligent applications, cybersecurity solutions, mobile engineering, and cloud backend architectures.
+              Modern technologies powering intelligent applications, full stack systems, mobile engineering, and cloud backend architectures.
             </p>
           </motion.div>
 

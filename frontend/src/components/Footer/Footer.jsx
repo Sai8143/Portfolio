@@ -129,7 +129,7 @@ function Footer() {
               >
                 Futuristic developer portfolio
                 focused on Artificial Intelligence,
-                Cybersecurity, Modern Full Stack
+                Modern Full Stack
                 Engineering and Next Generation
                 Technology Experiences.
               </p>

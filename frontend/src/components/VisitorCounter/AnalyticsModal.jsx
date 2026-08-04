@@ -65,7 +65,7 @@ export default function AnalyticsModal({ isOpen, onClose, visitorCount = 42 }) {
   const displayViews = telemetry?.total_page_views ?? visitorCount;
   const displayNodes = telemetry?.active_nodes ?? "Online / Production Engine";
   const displayResponse = telemetry?.avg_response_time ?? "< 12 ms";
-  const displayEncryption = telemetry?.security_encryption ?? "AES-256 Enabled";
+  const displayEncryption = telemetry?.security_encryption ?? "HTTPS Encrypted";
   const displayBrowsers = telemetry?.browser_breakdown ?? [
     { name: "Chrome / Chromium", percent: 75 },
     { name: "Safari / WebKit", percent: 15 },

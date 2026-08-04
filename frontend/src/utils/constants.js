@@ -64,7 +64,6 @@ export const SKILLS = [
 "React",
 "Flutter",
 "AI Systems",
-"Cybersecurity",
 "Firebase",
 "Python",
 "FastAPI",

@@ -367,11 +367,11 @@ mb-12
 
   <GlassCard className="p-4 text-center">
     <h3 className="text-2xl font-bold">
-      CYBER
+      IJAM
     </h3>
 
     <p className="terminal-label">
-      SECURITY
+      AUTHOR
     </p>
   </GlassCard>
 
