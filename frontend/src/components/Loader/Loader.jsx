@@ -21,7 +21,8 @@ function playSciFiLoaderSound(progress, audioCtxRef, oscRef, gainRef, pannerRef,
       ctx.resume().catch(() => {});
     }
 
-    if (!oscRef.current && ctx.state === "running") {
+    // Initialize audio nodes as soon as context is active/running
+    if (!oscRef.current && (ctx.state === "running" || ctx.state === "interactive")) {
       // 1. Deep Sub-Bass Singularity Drone (Pure Sine, no harsh buzz)
       const subOsc = ctx.createOscillator();
       subOsc.type = "sine";
@@ -163,6 +164,8 @@ export default function Loader({ onComplete }) {
   const [isDone, setIsDone] = useState(false);
   const [windowHeight, setWindowHeight] = useState(800);
 
+  const [audioSuspended, setAudioSuspended] = useState(true);
+
   const audioCtxRef = useRef(null);
   const oscRef = useRef(null);
   const gainRef = useRef(null);
@@ -174,26 +177,50 @@ export default function Loader({ onComplete }) {
 
     setWindowHeight(window.innerHeight);
 
+    // Eagerly pre-instantiate AudioContext so it exists for instant user touch unlock
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (AudioContext && !audioCtxRef.current) {
+      try {
+        audioCtxRef.current = new AudioContext();
+      } catch (e) {}
+    }
+
     const handleResize = () => {
       setWindowHeight(window.innerHeight);
     };
 
     const unlockAudio = () => {
-      if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
-        audioCtxRef.current.resume().catch(() => {});
-      }
+      try {
+        if (!audioCtxRef.current && AudioContext) {
+          audioCtxRef.current = new AudioContext();
+        }
+        if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
+          audioCtxRef.current.resume().then(() => {
+            setAudioSuspended(false);
+          }).catch(() => {});
+        } else if (audioCtxRef.current && audioCtxRef.current.state === "running") {
+          setAudioSuspended(false);
+        }
+      } catch (e) {}
     };
+
+    // Attempt instant activation
+    unlockAudio();
 
     window.addEventListener("resize", handleResize);
     window.addEventListener("click", unlockAudio);
-    window.addEventListener("touchstart", unlockAudio);
+    window.addEventListener("touchstart", unlockAudio, { passive: true });
+    window.addEventListener("touchend", unlockAudio, { passive: true });
     window.addEventListener("pointerdown", unlockAudio);
+    window.addEventListener("keydown", unlockAudio);
 
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("click", unlockAudio);
       window.removeEventListener("touchstart", unlockAudio);
+      window.removeEventListener("touchend", unlockAudio);
       window.removeEventListener("pointerdown", unlockAudio);
+      window.removeEventListener("keydown", unlockAudio);
     };
   }, []);
 
