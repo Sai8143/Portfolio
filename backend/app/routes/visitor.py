@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, HTTPException, Header, status
 from sqlalchemy.orm import Session
+from typing import Optional
 
 from app.database.db import get_db
+from app.config.settings import settings
 from app.services.visitor_service import (
     get_visitor_count,
     register_visitor,
@@ -16,16 +18,42 @@ router = APIRouter(
 )
 
 
+def verify_admin_access(
+    x_admin_password: Optional[str] = Header(None, alias="x-admin-password"),
+    authorization: Optional[str] = Header(None)
+) -> bool:
+    provided_key = x_admin_password
+    if not provided_key and authorization:
+        if authorization.startswith("Bearer "):
+            provided_key = authorization.replace("Bearer ", "").strip()
+        else:
+            provided_key = authorization.strip()
+
+    expected_key = settings.ADMIN_PASSWORD.strip()
+    if not provided_key or provided_key.strip().lower() != expected_key.lower():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized: Invalid Admin Password"
+        )
+    return True
+
+
 # =====================================
-# GET TOTAL VISITOR COUNT
+# GET TOTAL UNIQUE VISITOR COUNT
 # =====================================
 
 @router.get("")
 @router.get("/")
 async def get_visitors(db: Session = Depends(get_db)):
-    visitor = get_visitor_count(db)
+    count = get_visitor_count(db)
+    if count is None:
+        return {
+            "count": None,
+            "status": "database_unavailable"
+        }
     return {
-        "count": visitor.count if visitor else 42
+        "count": count,
+        "status": "online"
     }
 
 
@@ -43,7 +71,7 @@ async def register_unique_visitor(
     browser = payload.get("browser") or request.headers.get("user-agent", "Unknown Browser")
     operating_system = payload.get("operating_system") or "Unknown OS"
 
-    # Extract real client IP from reverse proxy / Vercel headers
+    # Extract real client IP (treating it strictly as metadata/telemetry)
     forwarded_for = request.headers.get("x-forwarded-for")
     if forwarded_for:
         ip_address = forwarded_for.split(",")[0].strip()
@@ -58,21 +86,42 @@ async def register_unique_visitor(
         operating_system=operating_system
     )
 
-    visitor = get_visitor_count(db)
+    count = get_visitor_count(db)
 
     return {
-        "success": True,
+        "success": result.get("success", False),
         "new_visitor": result.get("new_visitor", False),
-        "count": visitor.count if visitor else 42
+        "count": count,
+        "status": "online" if count is not None else "database_unavailable"
     }
 
 
 # =====================================
-# DETAILED VISITOR DATABASE LOGS (WHO SAW SITE)
+# ADMIN VERIFICATION
+# =====================================
+
+@router.post("/admin/verify")
+async def verify_admin(payload: dict):
+    password = (payload.get("password") or "").strip()
+    expected = settings.ADMIN_PASSWORD.strip()
+    if password.lower() == expected.lower():
+        return {"authenticated": True}
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid admin credentials"
+    )
+
+
+# =====================================
+# DETAILED VISITOR DATABASE LOGS (ADMIN ONLY)
 # =====================================
 
 @router.get("/logs")
-async def get_logs(limit: int = 15, db: Session = Depends(get_db)):
+async def get_logs(
+    limit: int = 20,
+    db: Session = Depends(get_db),
+    _: bool = Depends(verify_admin_access)
+):
     return {
         "logs": get_visitor_logs(db, limit=limit)
     }
@@ -88,12 +137,15 @@ async def analytics(db: Session = Depends(get_db)):
 
 
 # =====================================
-# RESET
+# RESET (ADMIN ONLY)
 # =====================================
 
 @router.post("/reset")
-async def reset_visitors(db: Session = Depends(get_db)):
-    visitor = reset_visitor_count(db)
+async def reset_visitors(
+    db: Session = Depends(get_db),
+    _: bool = Depends(verify_admin_access)
+):
+    count = reset_visitor_count(db)
     return {
-        "count": visitor.count if visitor else 0
+        "count": count
     }

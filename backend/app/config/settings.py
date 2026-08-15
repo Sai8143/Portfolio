@@ -16,6 +16,8 @@ class Settings(BaseSettings):
 
     FRONTEND_URL: str = "http://localhost:5173"
 
+    ADMIN_PASSWORD: str = os.environ.get("ADMIN_PASSWORD", "Sai8143")
+
     class Config:
         env_file = ".env"
 

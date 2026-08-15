@@ -1,5 +1,5 @@
 
-const API_URL = import.meta.env.VITE_API_URL || "https://backend-ruby-nine-62.vercel.app";
+const API_URL = import.meta.env.VITE_API_URL || "";
 
 export async function sendMessage(data) {
   try {

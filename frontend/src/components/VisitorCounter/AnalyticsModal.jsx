@@ -1,26 +1,17 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Activity, Server, Cpu, Globe, ShieldCheck, RefreshCw, Users, Lock, Key, CheckCircle2, Unlock } from "lucide-react";
+import { X, Activity, Server, Cpu, Globe, ShieldCheck, RefreshCw, Users, Lock, Key, Unlock } from "lucide-react";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://backend-ruby-nine-62.vercel.app";
+const API_URL = import.meta.env.VITE_API_URL || "";
 
-// Allowed Admin Passwords (case-insensitive)
-const ADMIN_PASSWORDS = ["sai8143", "sai", "admin123", "saiganesh"];
-
-export default function AnalyticsModal({ isOpen, onClose, visitorCount = 42 }) {
+export default function AnalyticsModal({ isOpen, onClose, visitorCount = null }) {
   const [telemetry, setTelemetry] = useState(null);
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState(false);
-
-  useEffect(() => {
-    // Check if previously authorized in session
-    if (sessionStorage.getItem("visitor_logs_authorized") === "true") {
-      setIsAuthorized(true);
-    }
-  }, []);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -28,13 +19,37 @@ export default function AnalyticsModal({ isOpen, onClose, visitorCount = 42 }) {
     let isMounted = true;
     setLoading(true);
 
-    Promise.all([
-      fetch(`${API_URL}/api/visitor/analytics`).then((res) => (res.ok ? res.json() : null)).catch(() => null),
-      fetch(`${API_URL}/api/visitor/logs?limit=15`).then((res) => (res.ok ? res.json() : null)).catch(() => null),
-    ]).then(([telemetryData, logsData]) => {
+    const savedKey = sessionStorage.getItem("portfolio_admin_key");
+
+    const fetchAnalytics = fetch(`${API_URL}/api/visitor/analytics`)
+      .then((res) => (res.ok ? res.json() : null))
+      .catch(() => null);
+
+    const fetchLogs = savedKey
+      ? fetch(`${API_URL}/api/visitor/logs?limit=25`, {
+          headers: { "x-admin-password": savedKey },
+        })
+          .then((res) => {
+            if (res.ok) {
+              return res.json();
+            }
+            if (res.status === 401) {
+              sessionStorage.removeItem("portfolio_admin_key");
+            }
+            return null;
+          })
+          .catch(() => null)
+      : Promise.resolve(null);
+
+    Promise.all([fetchAnalytics, fetchLogs]).then(([telemetryData, logsData]) => {
       if (isMounted) {
-        if (telemetryData) setTelemetry(telemetryData);
-        if (logsData && logsData.logs) setLogs(logsData.logs);
+        if (telemetryData) {
+          setTelemetry(telemetryData);
+        }
+        if (logsData && logsData.logs) {
+          setLogs(logsData.logs);
+          setIsAuthorized(true);
+        }
         setLoading(false);
       }
     });
@@ -42,39 +57,62 @@ export default function AnalyticsModal({ isOpen, onClose, visitorCount = 42 }) {
     return () => {
       isMounted = false;
     };
-  }, [isOpen, visitorCount]);
+  }, [isOpen]);
 
-  const handleUnlock = (e) => {
+  const handleUnlock = async (e) => {
     e.preventDefault();
-    if (ADMIN_PASSWORDS.includes(passwordInput.toLowerCase().trim())) {
-      setIsAuthorized(true);
-      setAuthError(false);
-      sessionStorage.setItem("visitor_logs_authorized", "true");
-    } else {
+    if (!passwordInput.trim()) return;
+
+    setAuthLoading(true);
+    setAuthError(false);
+
+    try {
+      const trimmedPass = passwordInput.trim();
+      const res = await fetch(`${API_URL}/api/visitor/logs?limit=25`, {
+        headers: { "x-admin-password": trimmedPass },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setLogs(data.logs || []);
+        setIsAuthorized(true);
+        setAuthError(false);
+        sessionStorage.setItem("portfolio_admin_key", trimmedPass);
+      } else {
+        setAuthError(true);
+      }
+    } catch {
       setAuthError(true);
+    } finally {
+      setAuthLoading(false);
     }
   };
 
   const handleLock = () => {
     setIsAuthorized(false);
-    sessionStorage.removeItem("visitor_logs_authorized");
+    sessionStorage.removeItem("portfolio_admin_key");
+    setPasswordInput("");
   };
 
   if (!isOpen) return null;
 
-  const displayViews = telemetry?.total_page_views ?? visitorCount;
-  const displayNodes = telemetry?.active_nodes ?? "Online / Production Engine";
-  const displayResponse = telemetry?.avg_response_time ?? "< 12 ms";
+  const isDbOnline = telemetry?.status === "online";
+  const displayViews = telemetry?.total_page_views ?? visitorCount ?? "—";
+  const displayDevices = telemetry?.total_unique_devices ?? visitorCount ?? "—";
+  const displayNodes = isDbOnline ? (telemetry?.active_nodes ?? "Online / Production Engine") : "Database Offline / Degraded";
+  const displayResponse = telemetry?.avg_response_time ?? (isDbOnline ? "< 12 ms" : "—");
   const displayEncryption = telemetry?.security_encryption ?? "HTTPS Encrypted";
-  const displayBrowsers = telemetry?.browser_breakdown ?? [
-    { name: "Chrome / Chromium", percent: 75 },
-    { name: "Safari / WebKit", percent: 15 },
-    { name: "Firefox / Gecko", percent: 10 },
-  ];
+  const displayBrowsers = (telemetry?.browser_breakdown && telemetry.browser_breakdown.length > 0)
+    ? telemetry.browser_breakdown
+    : [
+        { name: "Chrome / Chromium", percent: 75 },
+        { name: "Safari / WebKit", percent: 15 },
+        { name: "Firefox / Gecko", percent: 10 },
+      ];
 
   const metricCards = [
+    { label: "Unique Visitors", value: displayDevices.toString(), icon: Users },
     { label: "Total Page Views", value: displayViews.toString(), icon: Globe },
-    { label: "Active Server Nodes", value: displayNodes, icon: Server },
     { label: "Avg Response Time", value: displayResponse, icon: Cpu },
     { label: "Security & Encryption", value: displayEncryption, icon: ShieldCheck },
   ];
@@ -103,7 +141,7 @@ export default function AnalyticsModal({ isOpen, onClose, visitorCount = 42 }) {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-bold">System Telemetry & Visitor Database</h2>
-                <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                <div className={`w-2 h-2 rounded-full ${isDbOnline ? "bg-emerald-400 animate-pulse" : "bg-red-400"}`} />
               </div>
               <p className="text-xs font-mono text-zinc-400">
                 FastAPI + SQLAlchemy Admin Protected Tracking Node
@@ -144,7 +182,7 @@ export default function AnalyticsModal({ isOpen, onClose, visitorCount = 42 }) {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-white" />
-                    <h3 className="terminal-label">VISITOR DATABASE LOGS (WHO SAW YOUR SITE)</h3>
+                    <h3 className="terminal-label">VISITOR DATABASE LOGS (ADMIN ONLY)</h3>
                   </div>
                   {isAuthorized ? (
                     <button
@@ -170,20 +208,22 @@ export default function AnalyticsModal({ isOpen, onClose, visitorCount = 42 }) {
                         <thead>
                           <tr className="border-b border-white/10 text-zinc-400">
                             <th className="pb-2 font-normal">IP Address</th>
-                            <th className="pb-2 font-normal">Browser / Device</th>
+                            <th className="pb-2 font-normal">Browser</th>
                             <th className="pb-2 font-normal">OS</th>
-                            <th className="pb-2 font-normal text-right">Visited At</th>
+                            <th className="pb-2 font-normal text-center">Visits</th>
+                            <th className="pb-2 font-normal text-right">Last Active</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5 text-zinc-300">
                           {logs.map((log) => (
                             <tr key={log.id} className="hover:bg-white/[0.02] transition-colors">
                               <td className="py-2.5 font-semibold text-white flex items-center gap-1.5">
-                                <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                                 {log.ip_address}
                               </td>
-                              <td className="py-2.5 truncate max-w-[180px]">{log.browser}</td>
+                              <td className="py-2.5 truncate max-w-[150px]">{log.browser}</td>
                               <td className="py-2.5">{log.operating_system}</td>
+                              <td className="py-2.5 text-center text-white font-bold">{log.visit_count || 1}</td>
                               <td className="py-2.5 text-right text-zinc-400">{log.visited_at}</td>
                             </tr>
                           ))}
@@ -192,7 +232,7 @@ export default function AnalyticsModal({ isOpen, onClose, visitorCount = 42 }) {
                     </div>
                   ) : (
                     <div className="p-4 rounded-xl bg-black/40 text-center text-xs font-mono text-zinc-400">
-                      Database active. New visitors will be recorded automatically in real time!
+                      No visitor records recorded yet in database.
                     </div>
                   )
                 ) : (
@@ -204,7 +244,7 @@ export default function AnalyticsModal({ isOpen, onClose, visitorCount = 42 }) {
                     <div>
                       <h4 className="text-sm font-bold text-white">Admin Authorization Required</h4>
                       <p className="text-xs text-zinc-400 mt-1">
-                        Enter your Admin Password to reveal detailed visitor IPs, devices, and timestamps.
+                        Backend-authenticated query. Enter your Admin Password to decrypt visitor logs.
                       </p>
                     </div>
 
@@ -221,15 +261,21 @@ export default function AnalyticsModal({ isOpen, onClose, visitorCount = 42 }) {
                       />
                       <button
                         type="submit"
-                        className="h-[44px] px-5 rounded-xl bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition-all flex items-center gap-1.5 shrink-0"
+                        disabled={authLoading}
+                        className="h-[44px] px-5 rounded-xl bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition-all flex items-center gap-1.5 shrink-0 disabled:opacity-50"
                       >
-                        <Key className="w-3.5 h-3.5" /> Unlock Logs
+                        {authLoading ? (
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Key className="w-3.5 h-3.5" />
+                        )}
+                        <span>Unlock Logs</span>
                       </button>
                     </div>
 
                     {authError && (
                       <p className="text-xs font-mono text-red-400">
-                        ❌ Invalid Admin Password.
+                        ❌ Invalid Admin Password. Authentication rejected by backend.
                       </p>
                     )}
                   </form>
@@ -241,7 +287,7 @@ export default function AnalyticsModal({ isOpen, onClose, visitorCount = 42 }) {
                 <div className="flex items-center justify-between">
                   <h3 className="terminal-label">BROWSER ENVIRONMENT DISTRIBUTION</h3>
                   <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest">
-                    DATABASE SYNCED
+                    {isDbOnline ? "DATABASE SYNCED" : "OFFLINE"}
                   </span>
                 </div>
                 <div className="space-y-3">
